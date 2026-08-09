@@ -1125,6 +1125,52 @@
     margin-bottom: 24px;
   }
 
+  .score-breakdown {
+    text-align: left;
+    background: rgba(240,230,210,0.04);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 6px 20px;
+    margin-bottom: 24px;
+  }
+
+  .score-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(107,74,42,0.35);
+    font-size: 15px;
+    color: var(--ink);
+  }
+
+  .score-row:last-child { border-bottom: none; }
+
+  .score-row span:last-child {
+    font-weight: bold;
+  }
+
+  .score-row-good span:last-child { color: #8fc97e; }
+  .score-row-mid span:last-child { color: var(--gold-bright); }
+  .score-row-bad span:last-child { color: #d98a8a; }
+
+  .zakonczenie-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .zakonczenie-buttons .quiz-next {
+    display: inline-block;
+    margin: 0;
+  }
+
+  .quiz-next.secondary {
+    background: transparent;
+    color: var(--ink);
+    border-color: var(--panel-border);
+  }
+
   /* ===================== DIALOG PROFESORA (visual novel styl) ===================== */
   .prof-dialog-box {
     background: var(--panel);
@@ -1932,6 +1978,8 @@
 
   let z1Index = 0;
   let z1Score = 0;
+  let z2Score = 0;
+  let z3Score = 0;
 
   function startZadanie1() {
     currentStage = "Zadanie 1 - quiz wielokrotnego wyboru";
@@ -2045,6 +2093,7 @@
       playWrong();
     }
 
+    z2Score = poprawne;
     const feedback = document.getElementById("blanksFeedback");
     feedback.textContent = `Poprawnych odpowiedzi: ${poprawne} / ${zadanie2Odpowiedzi.length}`;
 
@@ -2233,6 +2282,7 @@
       playWrong();
     }
 
+    z3Score = poprawne;
     feedback.textContent = `Poprawnych odpowiedzi: ${poprawne} / ${zadanie3Zdania.length}`;
     document.getElementById("checkSortBtn").style.display = "none";
     const nextBtn = document.getElementById("sortNextBtn");
@@ -2242,23 +2292,76 @@
       playClick();
       wyslijWynik("ukończył/ukończyła Zadanie 3 - prawda/fałsz (" + poprawne + "/" + zadanie3Zdania.length + ")");
       playProfesorDialog(komentarzKoncowy, () => {
-        wyslijWynik("ukończył/ukończyła wszystkie zadania Poziomu 1");
         renderZakonczenie();
       });
     });
   }
 
   function renderZakonczenie() {
+    const maxZ1 = zadanie1Pytania.length;
+    const maxZ2 = zadanie2Odpowiedzi.length;
+    const maxZ3 = zadanie3Zdania.length;
+    const maxTotal = maxZ1 + maxZ2 + maxZ3;
+    const gotTotal = z1Score + z2Score + z3Score;
+    const percent = Math.round((gotTotal / maxTotal) * 100);
+    const zaliczone = percent === 100;
+
+    currentStage = zaliczone
+      ? "ukończył/ukończyła wszystkie zadania Poziomu 1 (zaliczone)"
+      : "ukończył/ukończyła wszystkie zadania Poziomu 1 (niezaliczone, " + percent + "%)";
+
+    wyslijWynik(
+      (zaliczone ? "ZALICZYŁ/ZALICZYŁA" : "NIE ZALICZYŁ/NIE ZALICZYŁA") +
+      " Poziom 1 - wynik łączny " + percent + "% (" + gotTotal + "/" + maxTotal + ")"
+    );
+
+    function scoreRowClass(got, max) {
+      if (got === max) return "score-row-good";
+      if (got === 0) return "score-row-bad";
+      return "score-row-mid";
+    }
+
     quizPanel.innerHTML = `
-      <div class="quiz-result-emoji">🚪</div>
-      <div class="quiz-result-score">Poziom 1 ukończony!</div>
-      <div class="quiz-result-text">Świetna robota. Wróć do wyboru poziomu, aby kontynuować przygodę.</div>
-      <button class="quiz-next" style="display:inline-block;" id="finishBackBtn">Wróć do wyboru poziomu</button>
+      <div class="quiz-result-emoji">${zaliczone ? "🏆" : "📖"}</div>
+      <div class="quiz-result-score">${percent}% poprawnych odpowiedzi</div>
+      <div class="quiz-result-text">
+        ${zaliczone
+          ? "Gratulacje! Zaliczyłeś/aś Poziom 1 na 100%."
+          : "Niestety nie udało się zaliczyć poziomu (wymagane 100%). Możesz spróbować ponownie."}
+      </div>
+      <div class="score-breakdown">
+        <div class="score-row ${scoreRowClass(z1Score, maxZ1)}">
+          <span>Zadanie 1 — Quiz</span><span>${z1Score} / ${maxZ1}</span>
+        </div>
+        <div class="score-row ${scoreRowClass(z2Score, maxZ2)}">
+          <span>Zadanie 2 — Uzupełnij lukę</span><span>${z2Score} / ${maxZ2}</span>
+        </div>
+        <div class="score-row ${scoreRowClass(z3Score, maxZ3)}">
+          <span>Zadanie 3 — Prawda/Fałsz</span><span>${z3Score} / ${maxZ3}</span>
+        </div>
+      </div>
+      <div class="zakonczenie-buttons">
+        ${!zaliczone ? '<button class="quiz-next" id="retryBtn">Spróbuj ponownie</button>' : ''}
+        <button class="quiz-next ${zaliczone ? '' : 'secondary'}" id="finishBackBtn">Wróć do wyboru poziomu</button>
+      </div>
     `;
     document.getElementById("finishBackBtn").addEventListener("click", () => {
       playClick();
       pokazEkran("screenLevels");
     });
+
+    const retryBtn = document.getElementById("retryBtn");
+    if (retryBtn) {
+      retryBtn.addEventListener("click", () => {
+        playClick();
+        // Reset wyników i powrót od razu do Zadania 1 - bez ponownego
+        // szukania Łucji na scenie z hotspotami
+        z1Score = 0;
+        z2Score = 0;
+        z3Score = 0;
+        startZadanie1();
+      });
+    }
   }
 
   // ============================================================
