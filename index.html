@@ -8,13 +8,13 @@
 <!-- Open Graph - podgląd linku w komunikatorach i social media -->
 <meta property="og:title" content="Opowieści z Narnii - odnajdź Łucję">
 <meta property="og:description" content="Interaktywna gra edukacyjna oparta na książce C.S. Lewisa. Pomóż Profesorowi odnaleźć Łucję i sprawdź swoją wiedzę o Narnii.">
-<meta property="og:image" content="https://ranalke.github.io/Narnia/og.png">
-<meta property="og:url" content="https://ranalke.github.io/Narnia/">
+<meta property="og:image" content="https://interaktywna-narnia.netlify.app/og.png">
+<meta property="og:url" content="https://interaktywna-narnia.netlify.app/">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Opowieści z Narnii - odnajdź Łucję">
 <meta name="twitter:description" content="Interaktywna gra edukacyjna oparta na książce C.S. Lewisa.">
-<meta name="twitter:image" content="https://ranalke.github.io/Narnia/og.png">
+<meta name="twitter:image" content="https://interaktywna-narnia.netlify.app/og.png">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -984,6 +984,23 @@
     color: var(--ink);
   }
 
+  #narratorBox .narrator-next-btn {
+    display: block;
+    margin: 12px 0 0 auto;
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 1px;
+    padding: 7px 22px;
+    background: linear-gradient(180deg, #8a6238, #5e3f22);
+    color: var(--gold-bright);
+    border: 1px solid var(--gold);
+    border-radius: 20px;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+
+  #narratorBox .narrator-next-btn:hover { transform: translateY(-1px); }
+
   /* ===================== EKRAN 4: QUIZ (WNĘTRZE SZAFY) ===================== */
   #screenQuiz .content {
     position: relative;
@@ -1490,6 +1507,7 @@
     <div class="narrator-body">
       <span class="narrator-label">Profesor</span>
       <div class="narrator-text" id="dialogText">Gdzie może być Łucja?</div>
+      <button class="narrator-next-btn" id="narratorNextBtn" style="display:none;">Dalej →</button>
     </div>
   </div>
 </div>
@@ -1667,11 +1685,10 @@
   // ---------- EKRAN 2: WYBÓR POZIOMU ----------
   document.getElementById("tileLevel1").addEventListener("click", () => {
     playClick();
-    currentStage = "szuka Łucji w Poziomie 1 (scena szafa/łóżko)";
+    currentStage = "słucha wprowadzenia Profesora na scenie";
     pokazEkran("screenGame");
-    dialogText.textContent = "Gdzie może być Łucja?";
-    showNarrator();
     setupSceneScroll();
+    startSceneIntro();
   });
 
   document.querySelectorAll('.level-tile.locked').forEach(tile => {
@@ -1691,6 +1708,7 @@
   // ---------- EKRAN 3: GRA (dymek narratora) ----------
   const dialogText = document.getElementById("dialogText");
   const narratorBox = document.getElementById("narratorBox");
+  const narratorNextBtn = document.getElementById("narratorNextBtn");
   let narratorTimeout;
 
   function showNarrator() {
@@ -1700,6 +1718,7 @@
 
   function mowNarrator(text) {
     // płynne zniknięcie starego tekstu, potem pojawienie nowego
+    narratorNextBtn.style.display = "none";
     narratorBox.classList.remove("show");
     clearTimeout(narratorTimeout);
     narratorTimeout = setTimeout(() => {
@@ -1707,6 +1726,52 @@
       narratorBox.classList.add("show");
     }, 260);
   }
+
+  // ---- Sekwencja wprowadzenia Profesora, pokazywana w dymku RPG na scenie ----
+  let sceneIntroStep = 0;
+  let sceneIntroActive = false;
+  const hotspotSzafaEl = document.getElementById("hotspotSzafa");
+  const hotspotLozkoEl = document.getElementById("hotspotLozko");
+
+  function startSceneIntro() {
+    sceneIntroStep = 0;
+    sceneIntroActive = true;
+    // Hotspoty nieaktywne dopóki Profesor nie skończy mówić - gracz ma
+    // najpierw poznać kontekst, zanim zacznie klikać po scenie
+    hotspotSzafaEl.style.pointerEvents = "none";
+    hotspotLozkoEl.style.pointerEvents = "none";
+    renderSceneIntroStep();
+  }
+
+  function renderSceneIntroStep() {
+    const text = introProfesora[sceneIntroStep];
+    const isLast = sceneIntroStep === introProfesora.length - 1;
+
+    narratorBox.classList.remove("show");
+    clearTimeout(narratorTimeout);
+    narratorTimeout = setTimeout(() => {
+      dialogText.innerHTML = text.replace(/\n/g, "<br><br>");
+      narratorNextBtn.textContent = isLast ? "Rozejrzyj się →" : "Dalej";
+      narratorNextBtn.style.display = "block";
+      narratorBox.classList.add("show");
+    }, 260);
+  }
+
+  narratorNextBtn.addEventListener("click", () => {
+    playClick();
+    sceneIntroStep++;
+    if (sceneIntroStep < introProfesora.length) {
+      renderSceneIntroStep();
+    } else {
+      // Intro zakończone - odblokuj hotspoty i pokaż zwykłą wskazówkę
+      sceneIntroActive = false;
+      hotspotSzafaEl.style.pointerEvents = "auto";
+      hotspotLozkoEl.style.pointerEvents = "auto";
+      currentStage = "szuka Łucji w Poziomie 1 (scena szafa/łóżko)";
+      narratorNextBtn.style.display = "none";
+      mowNarrator("Gdzie może być Łucja?");
+    }
+  });
 
   document.getElementById("hotspotLozko").addEventListener("click", () => {
     playWrong();
@@ -1717,10 +1782,10 @@
     playClick();
     mowNarrator("Znaleziono Łucję! Weszła do szafy...");
     wyslijWynik("znalazł/znalazła Łucję");
-    // Płynne przejście do wnętrza szafy i quizu po chwili, żeby dymek zdążył się pokazać
+    // Płynne przejście do wnętrza szafy i od razu Zadania 1 (intro już było na scenie)
     setTimeout(() => {
       pokazEkran("screenQuiz");
-      startQuiz();
+      startZadanie1();
     }, 1400);
   });
 
@@ -1830,11 +1895,9 @@
     });
   }
 
-  // ---- Punkt wejścia: startuje intro Profesora, potem Zadanie 1 ----
-  function startQuiz() {
-    currentStage = "słucha wprowadzenia Profesora (przed Zadaniem 1)";
-    playProfesorDialog(introProfesora, startZadanie1);
-  }
+  // (Uwaga: intro Profesora jest teraz pokazywane na scenie przed wejściem
+  // do szafy - patrz startSceneIntro() - więc tu przechodzimy od razu do Zadania 1
+  // po kliknięciu szafy, bez powtarzania wprowadzenia)
 
   // ============================================================
   // ZADANIE 1: QUIZ WIELOKROTNEGO WYBORU
