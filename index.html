@@ -369,6 +369,7 @@
     position: relative;
     width: 100%;
     height: 100%;
+    overflow: hidden;
   }
 
   #gameScene .bg-layer, #gameScene2 .bg-layer {
@@ -1060,6 +1061,15 @@
     z-index: 2;
     width: min(760px, 92vw);
     text-align: center;
+  }
+
+  /* Ekran zadań (quiz/luki/sortowanie) może mieć więcej treści niż mieści się
+     na ekranie telefonu (np. 14 kart do przeciągnięcia) - pozwalamy na
+     przewijanie w pionie, żeby przycisk "Dalej" zawsze dało się dosięgnąć */
+  #screenQuiz {
+    overflow-y: auto;
+    align-items: flex-start;
+    padding: 24px 0;
   }
 
   .quiz-panel {
@@ -2484,6 +2494,7 @@
     currentStage = "Zadanie 3 - sortowanie prawda/fałsz";
     z3Assignments = {};
     zadanie3Zdania.forEach((_, i) => { z3Assignments["z3item" + i] = null; });
+    currentAssignmentsTarget = z3Assignments;
 
     quizPanel.innerHTML = `
       <div class="quiz-progress">Zadanie 3 — Prawda czy fałsz?</div>
@@ -2600,10 +2611,17 @@
     });
   }
 
+  // currentAssignmentsTarget wskazuje, do którego słownika przypisań
+  // (z3Assignments dla Poziomu 1, traitsAssignments dla Poziomu 2) mają
+  // trafiać kolejne przypisania - ustawiane na starcie każdego zadania sortującego
+  let currentAssignmentsTarget = null;
+
   function placeItemInColumn(item, col) {
     col.appendChild(item);
     const colValue = col.dataset.col;
-    z3Assignments[item.id] = colValue;
+    if (currentAssignmentsTarget) {
+      currentAssignmentsTarget[item.id] = colValue;
+    }
     playClick();
   }
 
@@ -2825,7 +2843,6 @@
   let p2BlanksScore = 0, p2BlanksMax = 0;
   let p2SpiesFound = 0;
   const p2SpiesMax = 3;
-  let p2TraitsCheckScore = 0, p2TraitsCheckMax = 0;
 
   // ============================================================
   // KROK 1: LAS Z LATARNIĄ - szukanie fauna (zimno/ciepło)
@@ -2932,7 +2949,7 @@
   ];
 
   let traitsAll = [];
-  let traitsSelected = new Set();
+  let traitsSelected = {};
 
   function startTraitsTask() {
     currentStage = "Poziom 2 - Zadanie: dopasuj cechy Tumnusa";
@@ -2942,36 +2959,44 @@
       const j = Math.floor(Math.random() * (i + 1));
       [traitsAll[i], traitsAll[j]] = [traitsAll[j], traitsAll[i]];
     }
-    traitsSelected = new Set();
+    traitsSelected = {};
+    traitsAll.forEach((_, i) => { traitsSelected["trait" + i] = null; });
+    currentAssignmentsTarget = traitsSelected;
 
     pokazEkran("screenQuiz");
     setQuizBackground("las-latarnia.png");
     quizPanel.innerHTML = `
       <div class="quiz-progress">Poziom 2 — Poznaj Tumnusa</div>
-      <div class="quiz-question" style="font-size:16px;">Łucja spotkała niezwykłego mieszkańca Narnii. Sprawdź, jak dobrze go poznałeś. Zaznacz cechy, które do niego pasują.</div>
-      <div class="traits-grid" id="traitsGrid"></div>
-      <button class="quiz-next" id="checkTraitsBtn" style="display:inline-block;">Sprawdź</button>
-      <div class="quiz-feedback" id="traitsFeedback"></div>
+      <div class="quiz-question" style="font-size:16px;">Łucja spotkała niezwykłego mieszkańca Narnii. Sprawdź, jak dobrze go poznałeś. Przeciągnij każdą cechę do właściwej kolumny.</div>
+      <div class="sort-task-instructions">Przeciągnij cechę do kolumny "Pasuje" lub "Nie pasuje" (na telefonie: przytrzymaj i przesuń)</div>
+      <div class="sort-pool" id="traitsPool"></div>
+      <div class="sort-columns">
+        <div class="sort-column" id="colPasuje" data-col="pasuje">
+          <div class="sort-column-label">✅ Pasuje do Tumnusa</div>
+        </div>
+        <div class="sort-column" id="colNiePasuje" data-col="nie-pasuje">
+          <div class="sort-column-label">❌ Nie pasuje</div>
+        </div>
+      </div>
+      <button class="sort-check-btn" id="checkTraitsBtn">Sprawdź odpowiedzi</button>
+      <div class="sort-feedback" id="traitsFeedback"></div>
       <button class="quiz-next" id="traitsNextBtn" style="display:none; margin-top:16px;">Dalej →</button>
     `;
 
-    const grid = document.getElementById("traitsGrid");
+    const pool = document.getElementById("traitsPool");
     traitsAll.forEach((trait, i) => {
-      const card = document.createElement("div");
-      card.className = "trait-card";
-      card.textContent = trait;
-      card.dataset.trait = trait;
-      card.addEventListener("click", () => {
-        playClick();
-        if (traitsSelected.has(trait)) {
-          traitsSelected.delete(trait);
-          card.classList.remove("selected");
-        } else {
-          traitsSelected.add(trait);
-          card.classList.add("selected");
-        }
-      });
-      grid.appendChild(card);
+      const item = document.createElement("div");
+      item.className = "sort-item";
+      item.id = "trait" + i;
+      item.textContent = trait;
+      item.dataset.traitText = trait;
+      item.draggable = true;
+      pool.appendChild(item);
+      attachDragHandlers(item);
+    });
+
+    [document.getElementById("colPasuje"), document.getElementById("colNiePasuje")].forEach(col => {
+      attachDropHandlers(col);
     });
 
     document.getElementById("checkTraitsBtn").addEventListener("click", checkTraitsTask);
@@ -2979,37 +3004,50 @@
 
   function checkTraitsTask() {
     let correct = 0;
-    document.querySelectorAll("#traitsGrid .trait-card").forEach(card => {
-      const trait = card.dataset.trait;
-      const isSelected = traitsSelected.has(trait);
-      const isCorrect = traitsPoprawne.includes(trait);
+    let wszystkiePrzypisane = true;
 
-      if (isSelected && isCorrect) {
-        card.classList.add("correct");
+    traitsAll.forEach((trait, i) => {
+      const itemId = "trait" + i;
+      const item = document.getElementById(itemId);
+      const assigned = traitsSelected[itemId];
+
+      if (!assigned) {
+        wszystkiePrzypisane = false;
+        return;
+      }
+
+      const isCorrect = traitsPoprawne.includes(trait);
+      const assignedCorrect = (assigned === "pasuje" && isCorrect) || (assigned === "nie-pasuje" && !isCorrect);
+
+      if (assignedCorrect) {
+        item.classList.add("correct");
         correct++;
-      } else if (isSelected && !isCorrect) {
-        card.classList.add("wrong");
-      } else if (!isSelected && isCorrect) {
-        card.classList.add("missed");
+      } else {
+        item.classList.add("wrong");
       }
     });
 
-    p2TraitsScore = correct;
-    p2TraitsMax = traitsPoprawne.length;
-
-    if (correct === traitsPoprawne.length) playClick(); else playWrong();
-
     const feedback = document.getElementById("traitsFeedback");
-    feedback.textContent = `Poprawnie zaznaczonych cech: ${correct} / ${traitsPoprawne.length}`;
-    feedback.classList.add("show");
 
+    if (!wszystkiePrzypisane) {
+      feedback.textContent = "Przypisz wszystkie cechy do kolumn, zanim sprawdzisz.";
+      playWrong();
+      return;
+    }
+
+    p2TraitsScore = correct;
+    p2TraitsMax = traitsAll.length;
+
+    if (correct === traitsAll.length) playClick(); else playWrong();
+
+    feedback.textContent = `Poprawnie przypisanych cech: ${correct} / ${traitsAll.length}`;
     document.getElementById("checkTraitsBtn").style.display = "none";
     const nextBtn = document.getElementById("traitsNextBtn");
     nextBtn.style.display = "inline-block";
 
     nextBtn.addEventListener("click", () => {
       playClick();
-      wyslijWynik("ukończył/ukończyła Zadanie: cechy Tumnusa (" + correct + "/" + traitsPoprawne.length + ")");
+      wyslijWynik("ukończył/ukończyła Zadanie: cechy Tumnusa (" + correct + "/" + traitsAll.length + ")");
       startPieczaraScene();
     });
   }
@@ -3081,6 +3119,7 @@
 
     const table = document.getElementById("foodTable");
     attachFoodDropHandlers(table);
+    attachFoodPoolDropHandlers(pool);
 
     document.getElementById("checkFoodBtn").addEventListener("click", checkFoodTask);
   }
@@ -3138,8 +3177,11 @@
       const elUnder = document.elementFromPoint(touch.clientX, touch.clientY);
       document.querySelectorAll(".food-table").forEach(t => t.classList.remove("drag-over"));
       const tableUnder = elUnder ? elUnder.closest(".food-table") : null;
+      const poolUnder = elUnder ? elUnder.closest(".food-pool") : null;
       if (tableUnder) {
         placeFoodOnTable(item, tableUnder);
+      } else if (poolUnder && item.classList.contains("placed")) {
+        removeFoodFromTable(item, poolUnder);
       }
       currentDraggedFood = null;
     });
@@ -3160,7 +3202,36 @@
     });
   }
 
+  // Pula (obszar poniżej stołu) też przyjmuje upuszczenie - pozwala
+  // zabrać potrawę ze stołu z powrotem, jeśli gracz się pomylił
+  function attachFoodPoolDropHandlers(pool) {
+    pool.addEventListener("dragover", (e) => e.preventDefault());
+    pool.addEventListener("drop", (e) => {
+      e.preventDefault();
+      if (currentDraggedFood) removeFoodFromTable(currentDraggedFood, pool);
+    });
+  }
+
+  function removeFoodFromTable(item, pool) {
+    pool.appendChild(item);
+    item.classList.remove("placed");
+    foodOnTable.delete(item.dataset.foodId);
+    playClick();
+  }
+
   function placeFoodOnTable(item, table) {
+    // Limit miejsc na stole = liczba poprawnych potraw - nie da się
+    // "oszukać" zadania wrzucając wszystko naraz
+    if (foodOnTable.size >= foodPoprawne.length && !foodOnTable.has(item.dataset.foodId)) {
+      playWrong();
+      const feedback = document.getElementById("foodFeedback");
+      if (feedback) {
+        feedback.textContent = `Na stole jest już maksimum miejsc (${foodPoprawne.length}). Zabierz coś, żeby dodać inną potrawę.`;
+        feedback.classList.add("show");
+      }
+      return;
+    }
+
     table.appendChild(item);
     item.classList.add("placed");
     foodOnTable.add(item.dataset.foodId);
@@ -3463,7 +3534,7 @@
         if (p2SpiesFound === p2SpiesMax) {
           wyslijWynik("znalazł/znalazła wszystkich szpiegów Czarownicy (" + p2SpiesFound + "/" + p2SpiesMax + ")");
           setTimeout(() => {
-            startTraitsCheckTask();
+            renderZakonczeniePoziom2();
           }, 1600);
         }
       });
@@ -3473,104 +3544,18 @@
   }
 
   // ============================================================
-  // KROK 10: ZAZNACZ CECHY TUMNUSA (checkboxy, kilka poprawnych)
-  // ============================================================
-  function startTraitsCheckTask() {
-    currentStage = "Poziom 2 - ocena Tumnusa (zaznacz cechy)";
-    pokazEkran("screenQuiz");
-    setQuizBackground("las-nocny-szpiedzy.png");
-
-    const options = [
-      { text: "odważny", correct: true },
-      { text: "pomocny", correct: true },
-      { text: "bezwzględny", correct: false },
-      { text: "gotowy przyznać się do błędu", correct: true },
-      { text: "tchórzliwy", correct: false },
-      { text: "zdolny do zmiany swojej decyzji", correct: true }
-    ];
-
-    quizPanel.innerHTML = `
-      <div class="quiz-progress">Poziom 2 — Jak oceniasz Tumnusa?</div>
-      <div class="quiz-question">Udało się! Łucja i Tumnus przemknęli przez las niezauważeni. Zaznacz cechy, które pasują do Tumnusa (może być kilka poprawnych):</div>
-      <div class="checkbox-list" id="traitsCheckList"></div>
-      <button class="quiz-next" id="checkTraitsCheckBtn" style="display:inline-block;">Sprawdź</button>
-      <div class="quiz-feedback" id="traitsCheckFeedback"></div>
-      <button class="quiz-next" id="traitsCheckNextBtn" style="display:none; margin-top:16px;">Zakończ Poziom 2 →</button>
-    `;
-
-    const list = document.getElementById("traitsCheckList");
-    const selected = new Set();
-
-    options.forEach((opt, i) => {
-      const row = document.createElement("div");
-      row.className = "checkbox-item";
-      row.innerHTML = `<span class="checkbox-box"></span><span class="checkbox-item-text">${opt.text}</span>`;
-      row.addEventListener("click", () => {
-        playClick();
-        if (selected.has(i)) {
-          selected.delete(i);
-          row.classList.remove("checked");
-          row.querySelector(".checkbox-box").textContent = "";
-        } else {
-          selected.add(i);
-          row.classList.add("checked");
-          row.querySelector(".checkbox-box").textContent = "✓";
-        }
-      });
-      list.appendChild(row);
-    });
-
-    document.getElementById("checkTraitsCheckBtn").addEventListener("click", () => {
-      let correct = 0;
-      const maxCorrect = options.filter(o => o.correct).length;
-
-      document.querySelectorAll("#traitsCheckList .checkbox-item").forEach((row, i) => {
-        const isSelected = selected.has(i);
-        const isCorrect = options[i].correct;
-        if (isSelected && isCorrect) {
-          row.classList.add("correct");
-          correct++;
-        } else if (isSelected && !isCorrect) {
-          row.classList.add("wrong");
-        } else if (!isSelected && isCorrect) {
-          row.classList.add("wrong");
-        }
-      });
-
-      p2TraitsCheckScore = correct;
-      p2TraitsCheckMax = maxCorrect;
-
-      if (correct === maxCorrect) playClick(); else playWrong();
-
-      const feedback = document.getElementById("traitsCheckFeedback");
-      feedback.textContent = `Poprawnie zaznaczonych cech: ${correct} / ${maxCorrect}`;
-      feedback.classList.add("show");
-
-      document.getElementById("checkTraitsCheckBtn").style.display = "none";
-      document.getElementById("traitsCheckNextBtn").style.display = "inline-block";
-    });
-
-    document.getElementById("traitsCheckNextBtn").addEventListener("click", () => {
-      playClick();
-      wyslijWynik("ukończył/ukończyła Zadanie: ocena Tumnusa (" + p2TraitsCheckScore + "/" + p2TraitsCheckMax + ")");
-      renderZakonczeniePoziom2();
-    });
-  }
-
-  // ============================================================
   // EKRAN KOŃCOWY POZIOMU 2 - wynik procentowy + szczegóły
   // ============================================================
   function renderZakonczeniePoziom2() {
     const parts = [
       { label: "Znajdź fauna", got: 1, max: 1 }, // zawsze 1/1 - zadanie bez punktacji częściowej
-      { label: "Cechy Tumnusa (karty)", got: p2TraitsScore, max: p2TraitsMax },
+      { label: "Cechy Tumnusa (sortowanie)", got: p2TraitsScore, max: p2TraitsMax },
       { label: "Podwieczorek", got: p2FoodScore, max: p2FoodMax },
       { label: "Pytanie: łzy Tumnusa", got: p2Question1Correct ? 1 : 0, max: 1 },
       { label: "Pytanie: decyzja Tumnusa", got: p2Question2Correct ? 1 : 0, max: 1 },
       { label: "Znajdź parasol", got: p2ParasolFound ? 1 : 0, max: 1 },
       { label: "Luki o Czarownicy", got: p2BlanksScore, max: p2BlanksMax },
-      { label: "Szpiedzy w lesie", got: p2SpiesFound, max: p2SpiesMax },
-      { label: "Ocena Tumnusa", got: p2TraitsCheckScore, max: p2TraitsCheckMax }
+      { label: "Szpiedzy w lesie", got: p2SpiesFound, max: p2SpiesMax }
     ];
 
     const gotTotal = parts.reduce((sum, p) => sum + p.got, 0);
@@ -3629,7 +3614,7 @@
         p2TraitsScore = 0; p2FoodScore = 0;
         p2Question1Correct = false; p2Question2Correct = false;
         p2ParasolFound = false; p2BlanksScore = 0;
-        p2SpiesFound = 0; p2TraitsCheckScore = 0;
+        p2SpiesFound = 0;
         startTraitsTask();
       });
     }
