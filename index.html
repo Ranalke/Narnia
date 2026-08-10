@@ -75,10 +75,10 @@
 
   .screen {
     position: fixed;
-    inset: 0;
-    width: 100vw;
-    height: 100vh;
-    height: 100dvh; /* poprawna wysokość na telefonie, uwzględnia pasek adresu */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -346,34 +346,41 @@
   }
 
   /* ===================== EKRAN 3: GRA (POZIOM 1) ===================== */
-  #screenGame {
+  #screenGame, #screenGame2 {
     display: block;
+    width: 100%;
+    height: 100%;
   }
 
   /* Kontener sceny - na desktopie zwykłe tło na cały ekran,
      na telefonie (patrz media query niżej) zamienia się w poziomy scroll */
-  #gameSceneWrap {
+  #gameSceneWrap, #gameSceneWrap2 {
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
   }
 
-  #gameScene {
+  #gameScene, #gameScene2 {
     position: relative;
     width: 100%;
     height: 100%;
   }
 
-  #gameScene .bg-layer {
+  #gameScene .bg-layer, #gameScene2 .bg-layer {
     filter: none;
     transform: none;
   }
 
-  #gameScene .fog-layer {
+  #gameScene .fog-layer, #gameScene2 .fog-layer {
     opacity: 0.22;
   }
 
-  #gameScene .fog-layer.fog-layer-2 {
+  #gameScene .fog-layer.fog-layer-2, #gameScene2 .fog-layer.fog-layer-2 {
     opacity: 0.14;
   }
 
@@ -393,7 +400,7 @@
   }
 
   /* ---- Podpowiedź "przesuń, aby się rozejrzeć" (tylko telefon) ---- */
-  #scrollHint {
+  #scrollHint, #scrollHint2 {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -414,16 +421,16 @@
     pointer-events: none;
   }
 
-  #scrollHint.hidden {
+  #scrollHint.hidden, #scrollHint2.hidden {
     opacity: 0;
   }
 
-  #scrollHint .hint-icon {
+  #scrollHint .hint-icon, #scrollHint2 .hint-icon {
     font-size: 30px;
     animation: swipeHint 1.4s ease-in-out infinite;
   }
 
-  #scrollHint .hint-text {
+  #scrollHint .hint-text, #scrollHint2 .hint-text {
     font-family: 'Cinzel', serif;
     font-size: 14px;
     letter-spacing: 0.5px;
@@ -925,7 +932,7 @@
   }
 
   /* ---- Dymek narratora RPG-style ---- */
-  #narratorBox {
+  #narratorBox, #narratorBox2 {
     position: absolute;
     left: 50%;
     bottom: max(16px, env(safe-area-inset-bottom, 0px) + 12px);
@@ -948,12 +955,12 @@
     align-items: flex-start;
   }
 
-  #narratorBox.show {
+  #narratorBox.show, #narratorBox2.show {
     opacity: 1;
     transform: translate(-50%, 0);
   }
 
-  #narratorBox .prof-portrait {
+  #narratorBox .prof-portrait, #narratorBox2 .prof-portrait {
     width: clamp(48px, 7vw, 68px);
     height: clamp(48px, 7vw, 68px);
     border-radius: 50%;
@@ -963,12 +970,29 @@
     flex-shrink: 0;
   }
 
-  #narratorBox .narrator-body {
+  .narrator-question-mark {
+    width: clamp(48px, 7vw, 68px);
+    height: clamp(48px, 7vw, 68px);
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    box-shadow: 0 0 14px rgba(216,184,120,0.35);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(20px, 3vw, 28px);
+    color: var(--gold-bright);
+    background: rgba(20,15,10,0.5);
+    text-shadow: 0 0 10px rgba(216,184,120,0.5);
+  }
+
+  #narratorBox .narrator-body, #narratorBox2 .narrator-body {
     flex: 1;
     min-width: 0;
   }
 
-  #narratorBox .narrator-label {
+  #narratorBox .narrator-label, #narratorBox2 .narrator-label {
     font-family: 'Cinzel', serif;
     font-size: 13px;
     letter-spacing: 1.5px;
@@ -978,13 +1002,13 @@
     margin-bottom: 6px;
   }
 
-  #narratorBox .narrator-text {
+  #narratorBox .narrator-text, #narratorBox2 .narrator-text {
     font-size: clamp(16px, 1.8vw, 20px);
     line-height: 1.4;
     color: var(--ink);
   }
 
-  #narratorBox .narrator-next-btn {
+  #narratorBox .narrator-next-btn, #narratorBox2 .narrator-next-btn {
     display: block;
     margin: 12px 0 0 auto;
     font-family: 'Cinzel', serif;
@@ -999,7 +1023,36 @@
     pointer-events: auto;
   }
 
-  #narratorBox .narrator-next-btn:hover { transform: translateY(-1px); }
+  #narratorBox .narrator-next-btn:hover, #narratorBox2 .narrator-next-btn:hover { transform: translateY(-1px); }
+
+  /* ---- Wskaźnik zimno/ciepło przy szukaniu fauna w lesie ---- */
+  #tempIndicator {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 6;
+    padding: 10px 26px;
+    border-radius: 24px;
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    letter-spacing: 1px;
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    color: var(--gold-bright);
+    backdrop-filter: blur(6px);
+    opacity: 0;
+    transition: opacity 0.3s, background 0.3s, border-color 0.3s;
+    pointer-events: none;
+  }
+
+  #tempIndicator.show { opacity: 1; }
+
+  #tempIndicator.temp-zimno { border-color: #5a9bd5; color: #a8d0f0; }
+  #tempIndicator.temp-chlodno { border-color: #7ab8c9; color: #b8e0e8; }
+  #tempIndicator.temp-cieplo { border-color: #d8a878; color: #f0c898; }
+  #tempIndicator.temp-goraco { border-color: #d86838; color: #ffa878; }
+
 
   /* ===================== EKRAN 4: QUIZ (WNĘTRZE SZAFY) ===================== */
   #screenQuiz .content {
@@ -1409,16 +1462,262 @@
     color: var(--gold-bright);
   }
 
+  /* ============================================================
+     STYLE ZADAŃ POZIOMU 2
+     ============================================================ */
+
+  /* ---- Zadanie: dopasuj cechy Tumnusa (siatka klikalnych "kart cech") ---- */
+  .traits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .trait-card {
+    background: rgba(240,230,210,0.06);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 14px;
+    line-height: 1.35;
+    color: var(--ink);
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    user-select: none;
+  }
+
+  .trait-card:hover {
+    border-color: var(--gold);
+    transform: translateY(-1px);
+  }
+
+  .trait-card.selected {
+    background: rgba(216,184,120,0.18);
+    border-color: var(--gold);
+  }
+
+  .trait-card.correct {
+    background: rgba(120,180,110,0.25);
+    border-color: #8fc97e;
+  }
+
+  .trait-card.wrong {
+    background: rgba(200,90,90,0.25);
+    border-color: #d98a8a;
+  }
+
+  .trait-card.missed {
+    border-color: #d98a8a;
+    border-style: dashed;
+  }
+
+  /* ---- Zadanie: przeciąganie jedzenia na stół ---- */
+  .food-scene-wrap {
+    position: relative;
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    border: 1px solid var(--panel-border);
+  }
+
+  .food-scene-wrap img.food-table-bg {
+    width: 100%;
+    display: block;
+  }
+
+  .food-drop-zone {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10%;
+  }
+
+  .food-pool {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 18px;
+  }
+
+  .food-item {
+    width: 92px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+  }
+
+  .food-item:active { cursor: grabbing; }
+
+  .food-item img {
+    width: 76px;
+    height: 76px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 2px solid var(--panel-border);
+    transition: border-color 0.15s, opacity 0.15s;
+    background: rgba(240,230,210,0.06);
+  }
+
+  .food-item .food-label {
+    font-size: 11px;
+    text-align: center;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+
+  .food-item.dragging img { opacity: 0.4; }
+  .food-item.placed img { border-color: var(--gold); }
+  .food-item.correct img { border-color: #8fc97e; }
+  .food-item.wrong img { border-color: #d98a8a; }
+
+  .food-table {
+    min-height: 110px;
+    background: rgba(240,230,210,0.04);
+    border: 2px dashed var(--panel-border);
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 18px;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .food-table.drag-over {
+    border-color: var(--gold);
+    background: rgba(216,184,120,0.08);
+  }
+
+  .food-table-label {
+    width: 100%;
+    text-align: center;
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+
+  /* ---- Zadanie: kliknij przedmiot (parasol) na scenie pieczary ---- */
+  .click-object-hint {
+    text-align: center;
+    font-size: 14px;
+    color: var(--gold);
+    font-style: italic;
+    margin-bottom: 14px;
+  }
+
+  .click-object-wrap {
+    position: relative;
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--panel-border);
+    margin-bottom: 16px;
+  }
+
+  .click-object-wrap img {
+    width: 100%;
+    display: block;
+  }
+
+  .click-object-hotspot {
+    position: absolute;
+    cursor: pointer;
+    border: 3px solid transparent;
+    border-radius: 10px;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .click-object-hotspot:hover {
+    background: rgba(255,230,150,0.25);
+    border-color: rgba(255,230,150,0.85);
+  }
+
+  /* ---- Zadanie: zaznacz kilka cech (checkboxy) ---- */
+  .checkbox-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 22px;
+    text-align: left;
+  }
+
+  .checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(240,230,210,0.06);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+
+  .checkbox-item:hover { border-color: var(--gold); }
+
+  .checkbox-item.checked {
+    background: rgba(216,184,120,0.14);
+    border-color: var(--gold);
+  }
+
+  .checkbox-item.correct {
+    background: rgba(120,180,110,0.2);
+    border-color: #8fc97e;
+  }
+
+  .checkbox-item.wrong {
+    background: rgba(200,90,90,0.2);
+    border-color: #d98a8a;
+  }
+
+  .checkbox-box {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--gold);
+    border-radius: 4px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: var(--gold-bright);
+  }
+
+  .checkbox-item-text {
+    font-size: 15px;
+    color: var(--ink);
+  }
+
   @media (max-width: 560px) {
     .sort-columns {
       grid-template-columns: 1fr;
+    }
+    .traits-grid {
+      grid-template-columns: repeat(2, 1fr);
     }
   }
 
   /* ===================== TELEFON: SCENA SZAFY/ŁÓŻKA JAKO POZIOMY SCROLL ===================== */
   /* Uruchamia się gdy ekran jest węższy niż jest wysoki (typowy telefon w pionie) */
-  @media (max-aspect-ratio: 4/5) {
-    #gameSceneWrap {
+  @media (max-width: 700px) and (orientation: portrait) {
+    #gameSceneWrap, #gameSceneWrap2 {
       overflow-x: auto;
       overflow-y: hidden;
       -webkit-overflow-scrolling: touch;
@@ -1428,14 +1727,16 @@
     /* Obrazek dostaje stałą wysokość = wysokość ekranu, a szerokość
        przelicza się proporcjonalnie (1920x1080 -> ratio 16:9) -
        dzięki temu obrazek nigdy się nie odkształca i jest w pełnej jakości,
-       tylko szerszy niż ekran, więc trzeba go przewinąć */
-    #gameScene {
-      width: calc(100vh * 1920 / 1080);
+       tylko szerszy niż ekran, więc trzeba go przewinąć.
+       Używamy dvh (nie vh), żeby dokładnie odpowiadało realnej wysokości
+       kontenera (który też ma 100dvh) - inaczej powstaje wąski pasek z boku. */
+    #gameScene, #gameScene2 {
+      width: calc(100dvh * 1920 / 1080);
       height: 100%;
       min-width: 100%;
     }
 
-    #scrollHint {
+    #scrollHint, #scrollHint2 {
       display: flex;
     }
   }
@@ -1505,10 +1806,9 @@
         <div class="tile-shade"></div>
         <div class="tile-label">Poziom 1</div>
       </div>
-      <div class="level-tile locked" data-level="2">
-        <div class="tile-bg" style="background-image: url('levelszafa.png');"></div>
+      <div class="level-tile" id="tileLevel2" data-level="2">
+        <div class="tile-bg" style="background-image: url('las-latarnia.png');"></div>
         <div class="tile-shade"></div>
-        <span class="lock-icon">🔒</span>
         <div class="tile-label">Poziom 2</div>
       </div>
       <div class="level-tile locked" data-level="3">
@@ -1558,9 +1858,42 @@
   </div>
 </div>
 
+<!-- ===================== EKRAN 5: GRA - POZIOM 2 (scena dynamiczna) ===================== -->
+<div class="screen" id="screenGame2">
+  <button class="backBtn" id="backBtn2">← Wybór poziomu</button>
+
+  <div id="gameSceneWrap2">
+    <div id="gameScene2">
+      <div class="bg-layer" id="scene2BgLayer" style="background-image: url('las-latarnia.png');"></div>
+      <div class="fog-layer"></div>
+      <div class="fog-layer fog-layer-2"></div>
+
+      <!-- Hotspoty dodawane dynamicznie przez JS w zależności od aktualnej sceny -->
+      <div id="scene2Hotspots"></div>
+    </div>
+  </div>
+
+  <div id="scrollHint2">
+    <div class="hint-icon">👆↔️</div>
+    <div class="hint-text">Przesuń, aby się rozejrzeć</div>
+  </div>
+
+  <!-- Wskaźnik "zimno/ciepło" przy szukaniu fauna -->
+  <div id="tempIndicator"></div>
+
+  <div id="narratorBox2">
+    <div class="narrator-question-mark">?</div>
+    <div class="narrator-body">
+      <span class="narrator-label" id="narrator2Label">Narrator</span>
+      <div class="narrator-text" id="dialogText2">Łucja dotarła do niezwykłego miejsca.</div>
+      <button class="narrator-next-btn" id="narrator2NextBtn" style="display:none;">Dalej →</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===================== EKRAN 4: QUIZ (WNĘTRZE SZAFY) ===================== -->
 <div class="screen" id="screenQuiz">
-  <div class="bg-layer bg-blurred" style="background-image: url('wnetrzeszafy.png');"></div>
+  <div class="bg-layer bg-blurred" id="quizBgLayer" style="background-image: url('wnetrzeszafy.png');"></div>
   <div class="bg-overlay-dark"></div>
   <div class="fog-layer"></div>
   <div class="fog-layer fog-layer-2"></div>
@@ -1579,6 +1912,13 @@
 
   let playerName = "";
   let currentStage = "ekran startowy (podaje imię)";
+
+  // ---- Tło ekranu zadań (#screenQuiz) - dynamicznie dopasowane do ostatniej
+  // sceny, żeby zadania po "lesie" miały las w tle, a nie zawsze szafę ----
+  const quizBgLayer = document.getElementById("quizBgLayer");
+  function setQuizBackground(imageFile) {
+    quizBgLayer.style.backgroundImage = `url('${imageFile}')`;
+  }
 
   // ---------- DŹWIĘKI ----------
   const sndClick = new Audio("Click.mp3");
@@ -1737,6 +2077,14 @@
     startSceneIntro();
   });
 
+  document.getElementById("tileLevel2").addEventListener("click", () => {
+    playClick();
+    currentStage = "Poziom 2 - wchodzi do lasu z latarnią";
+    pokazEkran("screenGame2");
+    setupSceneScroll2();
+    startPoziom2();
+  });
+
   document.querySelectorAll('.level-tile.locked').forEach(tile => {
     tile.addEventListener('click', () => {
       playWrong();
@@ -1747,6 +2095,11 @@
   });
 
   document.getElementById("backBtn").addEventListener("click", () => {
+    playClick();
+    pokazEkran("screenLevels");
+  });
+
+  document.getElementById("backBtn2").addEventListener("click", () => {
     playClick();
     pokazEkran("screenLevels");
   });
@@ -1831,6 +2184,7 @@
     // Płynne przejście do wnętrza szafy i od razu Zadania 1 (intro już było na scenie)
     setTimeout(() => {
       pokazEkran("screenQuiz");
+      setQuizBackground("wnetrzeszafy.png");
       startZadanie1();
     }, 1400);
   });
@@ -1846,9 +2200,16 @@
     // Flaga: dopóki true, programowe wyśrodkowanie nie chowa podpowiedzi
     let ignoreScroll = true;
 
-    // Wyśrodkuj scenę (żeby gracz widział środek pokoju, nie sam lewy brzeg)
+    // Wyśrodkuj scenę TYLKO jeśli faktycznie jesteśmy w trybie telefonu
+    // (sprawdzone przez matchMedia, a nie przez scrollWidth - scrollWidth
+    // jest zawodny, bo warstwy mgły (.fog-layer) są celowo o 20% szersze
+    // niż kontener, więc scrollWidth > clientWidth zawsze, nawet na desktopie)
+    const isPhoneLayout = window.matchMedia("(max-width: 700px) and (orientation: portrait)").matches;
+
     requestAnimationFrame(() => {
-      wrap.scrollLeft = (wrap.scrollWidth - wrap.clientWidth) / 2;
+      if (isPhoneLayout) {
+        wrap.scrollLeft = (wrap.scrollWidth - wrap.clientWidth) / 2;
+      }
       // Krótkie opóźnienie, żeby zdarzenie "scroll" wywołane linijką wyżej
       // zdążyło przejść zanim zaczniemy nasłuchiwać na prawdziwe przesunięcia gracza
       setTimeout(() => { ignoreScroll = false; }, 150);
@@ -2360,6 +2721,916 @@
         z2Score = 0;
         z3Score = 0;
         startZadanie1();
+      });
+    }
+  }
+
+  // ============================================================
+  // POZIOM 2 - las, faun, pieczara Tumnusa, ciemny las
+  // ============================================================
+
+  // ---- Elementy sceny 2 (las/pieczara/ciemny las - tło zmienia się dynamicznie) ----
+  const scene2BgLayer = document.getElementById("scene2BgLayer");
+  const scene2Hotspots = document.getElementById("scene2Hotspots");
+  const gameSceneWrap2 = document.getElementById("gameSceneWrap2");
+  const dialogText2 = document.getElementById("dialogText2");
+  const narratorBox2 = document.getElementById("narratorBox2");
+  const narrator2Label = document.getElementById("narrator2Label");
+  const narrator2NextBtn = document.getElementById("narrator2NextBtn");
+  const tempIndicator = document.getElementById("tempIndicator");
+  let narrator2Timeout;
+
+  function mowNarrator2(text, label) {
+    if (label) narrator2Label.textContent = label;
+    narrator2NextBtn.style.display = "none";
+    narratorBox2.classList.remove("show");
+    clearTimeout(narrator2Timeout);
+    narrator2Timeout = setTimeout(() => {
+      dialogText2.innerHTML = text.replace(/\n/g, "<br><br>");
+      narratorBox2.classList.add("show");
+    }, 260);
+  }
+
+  // ---- Silnik sekwencji dialogowej na scenie 2 (fragment po fragmencie + Dalej) ----
+  let scene2DialogFragments = [];
+  let scene2DialogStep = 0;
+  let scene2DialogLabel = "Narrator";
+  let scene2DialogOnComplete = null;
+
+  function playScene2Dialog(fragments, label, onComplete) {
+    scene2DialogFragments = fragments;
+    scene2DialogStep = 0;
+    scene2DialogLabel = label;
+    scene2DialogOnComplete = onComplete;
+    renderScene2DialogStep();
+  }
+
+  function renderScene2DialogStep() {
+    const text = scene2DialogFragments[scene2DialogStep];
+    const isLast = scene2DialogStep === scene2DialogFragments.length - 1;
+    narrator2Label.textContent = scene2DialogLabel;
+    narratorBox2.classList.remove("show");
+    clearTimeout(narrator2Timeout);
+    narrator2Timeout = setTimeout(() => {
+      dialogText2.innerHTML = text.replace(/\n/g, "<br><br>");
+      narrator2NextBtn.textContent = isLast ? "Dalej →" : "Dalej";
+      narrator2NextBtn.style.display = "block";
+      narratorBox2.classList.add("show");
+    }, 260);
+  }
+
+  narrator2NextBtn.addEventListener("click", () => {
+    playClick();
+    scene2DialogStep++;
+    if (scene2DialogStep < scene2DialogFragments.length) {
+      renderScene2DialogStep();
+    } else {
+      narrator2NextBtn.style.display = "none";
+      if (scene2DialogOnComplete) scene2DialogOnComplete();
+    }
+  });
+
+  // ---- Wyśrodkowanie/scroll na telefonie dla sceny 2 (analogicznie do sceny 1) ----
+  function setupSceneScroll2() {
+    const hint = document.getElementById("scrollHint2");
+    hint.classList.remove("hidden");
+    let ignoreScroll = true;
+    const isPhoneLayout = window.matchMedia("(max-width: 700px) and (orientation: portrait)").matches;
+
+    requestAnimationFrame(() => {
+      if (isPhoneLayout) {
+        gameSceneWrap2.scrollLeft = (gameSceneWrap2.scrollWidth - gameSceneWrap2.clientWidth) / 2;
+      }
+      setTimeout(() => { ignoreScroll = false; }, 150);
+    });
+
+    function hideHint() {
+      if (ignoreScroll) return;
+      hint.classList.add("hidden");
+      gameSceneWrap2.removeEventListener("scroll", hideHint);
+    }
+    gameSceneWrap2.addEventListener("scroll", hideHint, { passive: true });
+    gameSceneWrap2.addEventListener("touchmove", () => {
+      hint.classList.add("hidden");
+      gameSceneWrap2.removeEventListener("scroll", hideHint);
+    }, { passive: true, once: true });
+  }
+
+  // ---- Wyniki zadań Poziomu 2, do podsumowania na końcu ----
+  let p2TraitsScore = 0, p2TraitsMax = 0;
+  let p2FoodScore = 0, p2FoodMax = 0;
+  let p2Question1Correct = false;
+  let p2Question2Correct = false;
+  let p2ParasolFound = false;
+  let p2BlanksScore = 0, p2BlanksMax = 0;
+  let p2SpiesFound = 0;
+  const p2SpiesMax = 3;
+  let p2TraitsCheckScore = 0, p2TraitsCheckMax = 0;
+
+  // ============================================================
+  // KROK 1: LAS Z LATARNIĄ - szukanie fauna (zimno/ciepło)
+  // ============================================================
+  function startPoziom2() {
+    currentStage = "Poziom 2 - las z latarnią, szuka fauna";
+    scene2BgLayer.style.backgroundImage = "url('las-latarnia.png')";
+    scene2Hotspots.innerHTML = "";
+    tempIndicator.classList.remove("show");
+
+    playScene2Dialog(
+      [
+        "Łucja dotarła do niezwykłego miejsca. Pośrodku zaśnieżonego lasu zobaczyła latarnię, której światło rozjaśniało zimową ciemność.",
+        "Chwilę później usłyszała odgłos kroków. Ktoś lub coś musiało znajdować się w pobliżu.",
+        "Rozejrzyj się uważnie. Wśród drzew i śniegu ukrywa się tajemniczy wędrowiec.\nCzy potrafisz go odnaleźć?",
+        "Przyjrzyj się dokładnie każdemu zakątkowi lasu. Czasem wystarczy zauważyć niewielki szczegół, aby odkryć, kto się ukrywa."
+      ],
+      "Narrator",
+      startFaunSearch
+    );
+  }
+
+  // Faun ukryty za choinką w prawej części obrazka - punkt "gorąco" to jego
+  // rzeczywista pozycja, reszta obszaru daje coraz chłodniejsze komunikaty
+  const faunTargetX = 68; // % szerokości obrazka
+  const faunTargetY = 55; // % wysokości obrazka
+
+  function startFaunSearch() {
+    // Chowamy duży dymek dialogowy - na czas szukania wystarczy sam
+    // mały wskaźnik zimno/gorąco na górze, żeby nie zasłaniać sceny
+    narratorBox2.classList.remove("show");
+    clearTimeout(narrator2Timeout);
+
+    tempIndicator.classList.add("show");
+    tempIndicator.textContent = "Kliknij w scenę, aby szukać...";
+
+    const scene = document.getElementById("gameScene2");
+    scene.style.cursor = "url('kursor.png') 4 4, auto";
+
+    function handleSceneClick(e) {
+      const rect = scene.getBoundingClientRect();
+      const clickX = ((e.clientX - rect.left) / rect.width) * 100;
+      const clickY = ((e.clientY - rect.top) / rect.height) * 100;
+
+      const dist = Math.sqrt(
+        Math.pow(clickX - faunTargetX, 2) + Math.pow(clickY - faunTargetY, 2)
+      );
+
+      tempIndicator.classList.remove("temp-zimno", "temp-chlodno", "temp-cieplo", "temp-goraco");
+
+      if (dist < 6) {
+        // Znaleziono fauna
+        playClick();
+        scene.removeEventListener("click", handleSceneClick);
+        wyslijWynik("znalazł/znalazła fauna w lesie (Poziom 2)");
+        tempIndicator.textContent = "🔥 Znaleziono!";
+        tempIndicator.classList.add("temp-goraco");
+        setTimeout(() => {
+          tempIndicator.classList.remove("show");
+          startTraitsTask();
+        }, 1200);
+        return;
+      }
+
+      playWrong();
+      if (dist < 15) {
+        tempIndicator.textContent = "🔥 Gorąco!";
+        tempIndicator.classList.add("temp-goraco");
+      } else if (dist < 28) {
+        tempIndicator.textContent = "☀️ Ciepło";
+        tempIndicator.classList.add("temp-cieplo");
+      } else if (dist < 45) {
+        tempIndicator.textContent = "❄️ Chłodno";
+        tempIndicator.classList.add("temp-chlodno");
+      } else {
+        tempIndicator.textContent = "🧊 Zimno";
+        tempIndicator.classList.add("temp-zimno");
+      }
+    }
+
+    scene.addEventListener("click", handleSceneClick);
+  }
+
+  // ============================================================
+  // KROK 2: DOPASUJ CECHY TUMNUSA (klikalne karty)
+  // ============================================================
+  const traitsPoprawne = [
+    "trochę wyższy od Łucji",
+    "od pasa w górę przypominał człowieka",
+    "nogi kozła, pokryte czarną sierścią",
+    "kopyta zamiast stóp",
+    "miał ogon",
+    "skóra o lekko czerwonej barwie",
+    "miał krótką bródkę",
+    "miał kręcące się włosy",
+    "dwa małe rogi",
+    "miał brązowe oczy",
+    "nosił czerwony, wełniany szal"
+  ];
+  const traitsFalszywe = [
+    "nosił czarne, skórzane buty",
+    "miał gęste, czarne wąsy",
+    "zamiast kopyt miał duże, owłosione stopy"
+  ];
+
+  let traitsAll = [];
+  let traitsSelected = new Set();
+
+  function startTraitsTask() {
+    currentStage = "Poziom 2 - Zadanie: dopasuj cechy Tumnusa";
+    traitsAll = [...traitsPoprawne, ...traitsFalszywe];
+    // Tasowanie kolejności, żeby poprawne i fałszywe nie leżały blokowo
+    for (let i = traitsAll.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [traitsAll[i], traitsAll[j]] = [traitsAll[j], traitsAll[i]];
+    }
+    traitsSelected = new Set();
+
+    pokazEkran("screenQuiz");
+    setQuizBackground("las-latarnia.png");
+    quizPanel.innerHTML = `
+      <div class="quiz-progress">Poziom 2 — Poznaj Tumnusa</div>
+      <div class="quiz-question" style="font-size:16px;">Łucja spotkała niezwykłego mieszkańca Narnii. Sprawdź, jak dobrze go poznałeś. Zaznacz cechy, które do niego pasują.</div>
+      <div class="traits-grid" id="traitsGrid"></div>
+      <button class="quiz-next" id="checkTraitsBtn" style="display:inline-block;">Sprawdź</button>
+      <div class="quiz-feedback" id="traitsFeedback"></div>
+      <button class="quiz-next" id="traitsNextBtn" style="display:none; margin-top:16px;">Dalej →</button>
+    `;
+
+    const grid = document.getElementById("traitsGrid");
+    traitsAll.forEach((trait, i) => {
+      const card = document.createElement("div");
+      card.className = "trait-card";
+      card.textContent = trait;
+      card.dataset.trait = trait;
+      card.addEventListener("click", () => {
+        playClick();
+        if (traitsSelected.has(trait)) {
+          traitsSelected.delete(trait);
+          card.classList.remove("selected");
+        } else {
+          traitsSelected.add(trait);
+          card.classList.add("selected");
+        }
+      });
+      grid.appendChild(card);
+    });
+
+    document.getElementById("checkTraitsBtn").addEventListener("click", checkTraitsTask);
+  }
+
+  function checkTraitsTask() {
+    let correct = 0;
+    document.querySelectorAll("#traitsGrid .trait-card").forEach(card => {
+      const trait = card.dataset.trait;
+      const isSelected = traitsSelected.has(trait);
+      const isCorrect = traitsPoprawne.includes(trait);
+
+      if (isSelected && isCorrect) {
+        card.classList.add("correct");
+        correct++;
+      } else if (isSelected && !isCorrect) {
+        card.classList.add("wrong");
+      } else if (!isSelected && isCorrect) {
+        card.classList.add("missed");
+      }
+    });
+
+    p2TraitsScore = correct;
+    p2TraitsMax = traitsPoprawne.length;
+
+    if (correct === traitsPoprawne.length) playClick(); else playWrong();
+
+    const feedback = document.getElementById("traitsFeedback");
+    feedback.textContent = `Poprawnie zaznaczonych cech: ${correct} / ${traitsPoprawne.length}`;
+    feedback.classList.add("show");
+
+    document.getElementById("checkTraitsBtn").style.display = "none";
+    const nextBtn = document.getElementById("traitsNextBtn");
+    nextBtn.style.display = "inline-block";
+
+    nextBtn.addEventListener("click", () => {
+      playClick();
+      wyslijWynik("ukończył/ukończyła Zadanie: cechy Tumnusa (" + correct + "/" + traitsPoprawne.length + ")");
+      startPieczaraScene();
+    });
+  }
+
+  // ============================================================
+  // KROK 3: PIECZARA TUMNUSA - dialog, potem pytanie o łzy
+  // ============================================================
+  function startPieczaraScene() {
+    currentStage = "Poziom 2 - pieczara Tumnusa";
+    pokazEkran("screenGame2");
+    scene2BgLayer.style.backgroundImage = "url('pieczara-tumnusa.png')";
+    scene2Hotspots.innerHTML = "";
+    setupSceneScroll2();
+
+    playScene2Dialog(
+      ["Tumnus: Zapraszam Cię do mojej pieczary. Jest niedaleko.", "Tumnus: Nie potrwa to długo. Przygotuję coś na podwieczorek."],
+      "Tumnus",
+      startFoodTask
+    );
+  }
+
+  // ============================================================
+  // KROK 4: PRZECIĄGANIE JEDZENIA NA STÓŁ
+  // ============================================================
+  const foodPoprawne = [
+    { id: "jajka", label: "Jajka na miękko", img: "jedzenie-jajka.png" },
+    { id: "sardynki", label: "Sardynki na grzankach", img: "jedzenie-sardynki.png" },
+    { id: "grzanki-maslo", label: "Grzanki z masłem", img: "jedzenie-grzanki-maslo.png" },
+    { id: "grzanki-miod", label: "Grzanki z miodem", img: "jedzenie-grzanki-miod.png" },
+    { id: "ciasto", label: "Ciasto z lukrem", img: "jedzenie-ciasto.png" }
+  ];
+  const foodFalszywe = [
+    { id: "owsianka", label: "Owsianka z jagodami", img: "jedzenie-owsianka.png" },
+    { id: "jablko", label: "Pieczone jabłko", img: "jedzenie-jablko.png" },
+    { id: "mleko", label: "Mleko z miodem", img: "jedzenie-mleko.png" }
+  ];
+
+  let foodAll = [];
+  let foodOnTable = new Set();
+  let currentDraggedFood = null;
+
+  function startFoodTask() {
+    currentStage = "Poziom 2 - Zadanie: podwieczorek Tumnusa";
+    foodAll = [...foodPoprawne, ...foodFalszywe];
+    for (let i = foodAll.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [foodAll[i], foodAll[j]] = [foodAll[j], foodAll[i]];
+    }
+    foodOnTable = new Set();
+
+    pokazEkran("screenQuiz");
+    setQuizBackground("pieczara-tumnusa.png");
+    quizPanel.innerHTML = `
+      <div class="quiz-progress">Poziom 2 — Podwieczorek</div>
+      <div class="quiz-question" style="font-size:16px;">Tumnus: O nie! Ktoś pomieszał moje potrawy! Wybierz tylko te smakołyki, które przygotowałem dla Łucji, i przeciągnij je na stół.</div>
+      <div class="food-table-label">🍽 Stół</div>
+      <div class="food-table" id="foodTable"></div>
+      <div class="food-pool" id="foodPool"></div>
+      <button class="quiz-next" id="checkFoodBtn" style="display:inline-block;">Sprawdź stół</button>
+      <div class="quiz-feedback" id="foodFeedback"></div>
+      <button class="quiz-next" id="foodNextBtn" style="display:none; margin-top:16px;">Dalej →</button>
+    `;
+
+    const pool = document.getElementById("foodPool");
+    foodAll.forEach(food => {
+      const item = createFoodItem(food);
+      pool.appendChild(item);
+    });
+
+    const table = document.getElementById("foodTable");
+    attachFoodDropHandlers(table);
+
+    document.getElementById("checkFoodBtn").addEventListener("click", checkFoodTask);
+  }
+
+  function createFoodItem(food) {
+    const item = document.createElement("div");
+    item.className = "food-item";
+    item.id = "food-" + food.id;
+    item.draggable = true;
+    item.dataset.foodId = food.id;
+    item.innerHTML = `<img src="${food.img}" alt="${food.label}"><div class="food-label">${food.label}</div>`;
+
+    item.addEventListener("dragstart", () => {
+      currentDraggedFood = item;
+      item.classList.add("dragging");
+    });
+    item.addEventListener("dragend", () => {
+      item.classList.remove("dragging");
+      currentDraggedFood = null;
+    });
+
+    // Touch support
+    let touchStartX = 0, touchStartY = 0, isDraggingTouch = false;
+    item.addEventListener("touchstart", (e) => {
+      currentDraggedFood = item;
+      item.classList.add("dragging");
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      isDraggingTouch = true;
+    }, { passive: true });
+
+    item.addEventListener("touchmove", (e) => {
+      if (!isDraggingTouch) return;
+      e.preventDefault();
+      const touch = e.touches[0];
+      item.style.position = "relative";
+      item.style.zIndex = "50";
+      item.style.left = (touch.clientX - touchStartX) + "px";
+      item.style.top = (touch.clientY - touchStartY) + "px";
+      const elUnder = document.elementFromPoint(touch.clientX, touch.clientY);
+      document.querySelectorAll(".food-table").forEach(t => t.classList.remove("drag-over"));
+      const tableUnder = elUnder ? elUnder.closest(".food-table") : null;
+      if (tableUnder) tableUnder.classList.add("drag-over");
+    }, { passive: false });
+
+    item.addEventListener("touchend", (e) => {
+      if (!isDraggingTouch) return;
+      isDraggingTouch = false;
+      item.classList.remove("dragging");
+      item.style.position = "";
+      item.style.left = "";
+      item.style.top = "";
+      item.style.zIndex = "";
+      const touch = e.changedTouches[0];
+      const elUnder = document.elementFromPoint(touch.clientX, touch.clientY);
+      document.querySelectorAll(".food-table").forEach(t => t.classList.remove("drag-over"));
+      const tableUnder = elUnder ? elUnder.closest(".food-table") : null;
+      if (tableUnder) {
+        placeFoodOnTable(item, tableUnder);
+      }
+      currentDraggedFood = null;
+    });
+
+    return item;
+  }
+
+  function attachFoodDropHandlers(table) {
+    table.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      table.classList.add("drag-over");
+    });
+    table.addEventListener("dragleave", () => table.classList.remove("drag-over"));
+    table.addEventListener("drop", (e) => {
+      e.preventDefault();
+      table.classList.remove("drag-over");
+      if (currentDraggedFood) placeFoodOnTable(currentDraggedFood, table);
+    });
+  }
+
+  function placeFoodOnTable(item, table) {
+    table.appendChild(item);
+    item.classList.add("placed");
+    foodOnTable.add(item.dataset.foodId);
+    playClick();
+  }
+
+  function checkFoodTask() {
+    let correct = 0;
+    foodOnTable.forEach(foodId => {
+      const isCorrect = foodPoprawne.some(f => f.id === foodId);
+      const el = document.getElementById("food-" + foodId);
+      if (isCorrect) {
+        el.classList.add("correct");
+        correct++;
+      } else {
+        el.classList.add("wrong");
+      }
+    });
+    // Elementy poprawne, których gracz NIE przeniósł na stół, też liczą się jako błąd
+    foodPoprawne.forEach(f => {
+      if (!foodOnTable.has(f.id)) {
+        const el = document.getElementById("food-" + f.id);
+        if (el) el.classList.add("missed");
+      }
+    });
+
+    p2FoodScore = correct;
+    p2FoodMax = foodPoprawne.length;
+
+    if (correct === foodPoprawne.length) playClick(); else playWrong();
+
+    const feedback = document.getElementById("foodFeedback");
+    feedback.textContent = `Poprawnych potraw na stole: ${correct} / ${foodPoprawne.length}`;
+    feedback.classList.add("show");
+
+    document.getElementById("checkFoodBtn").style.display = "none";
+    const nextBtn = document.getElementById("foodNextBtn");
+    nextBtn.style.display = "inline-block";
+
+    nextBtn.addEventListener("click", () => {
+      playClick();
+      wyslijWynik("ukończył/ukończyła Zadanie: podwieczorek (" + correct + "/" + foodPoprawne.length + ")");
+      startQuestion1();
+    });
+  }
+
+  // ============================================================
+  // KROK 5: PYTANIE - dlaczego Tumnus płacze
+  // ============================================================
+  function startQuestion1() {
+    currentStage = "Poziom 2 - pytanie: dlaczego Tumnus płacze";
+    setQuizBackground("pieczara-tumnusa.png");
+    quizPanel.innerHTML = `
+      <div class="quiz-progress">Poziom 2 — Łzy Tumnusa</div>
+      <div class="quiz-question">Czas płynął szybko. Łucja przypomniała sobie jednak, że powinna wrócić. Wtedy Tumnus nagle się rozpłakał.<br><br>Dlaczego Tumnus zaczął płakać?</div>
+      <div class="quiz-options" id="q1Options"></div>
+      <div class="quiz-feedback" id="q1Feedback"></div>
+      <button class="quiz-next" id="q1NextBtn">Dalej →</button>
+    `;
+
+    const options = [
+      "Bał się, że Łucja nie będzie chciała już go odwiedzać.",
+      "Przypomniał sobie, że obiecał Białej Czarownicy, że wyda jej ludzi, którzy przybędą do Narnii.",
+      "Martwił się, że Łucja nie znajdzie drogi powrotnej do swojego świata.",
+      "Było mu żal, że podwieczorek i ich wspólne spotkanie dobiegły końca."
+    ];
+    const correctIndex = 1;
+    const litery = ["A.", "B.", "C.", "D."];
+
+    const optionsDiv = document.getElementById("q1Options");
+    options.forEach((opt, i) => {
+      const btn = document.createElement("div");
+      btn.className = "quiz-option";
+      btn.textContent = litery[i] + " " + opt;
+      btn.addEventListener("click", () => {
+        const els = document.querySelectorAll("#q1Options .quiz-option");
+        els.forEach(el => el.classList.add("disabled"));
+        els[correctIndex].classList.add("correct");
+        const feedback = document.getElementById("q1Feedback");
+        if (i === correctIndex) {
+          playClick();
+          p2Question1Correct = true;
+          feedback.textContent = "Poprawnie!";
+        } else {
+          playWrong();
+          els[i].classList.add("wrong");
+          p2Question1Correct = false;
+          feedback.textContent = "Niepoprawnie.";
+        }
+        feedback.classList.add("show");
+        document.getElementById("q1NextBtn").style.display = "inline-block";
+      });
+      optionsDiv.appendChild(btn);
+    });
+
+    document.getElementById("q1NextBtn").addEventListener("click", () => {
+      playClick();
+      wyslijWynik("odpowiedział/odpowiedziała na pytanie o łzy Tumnusa (" + (p2Question1Correct ? "poprawnie" : "błędnie") + ")");
+      startTumnusDialog2();
+    });
+  }
+
+  function startTumnusDialog2() {
+    pokazEkran("screenGame2");
+    setupSceneScroll2();
+    playScene2Dialog(
+      ["Narrator: Tumnus wyznał Łucji, że jest sługą Białej Czarownicy. Otrzymał rozkaz porywania dzieci, które pojawią się w Narnii. Łucja znalazła się w poważnym niebezpieczeństwie. POWSTRZYMAJ TUMNUSA!"],
+      "Narrator",
+      startQuestion2
+    );
+  }
+
+  // ============================================================
+  // KROK 6: PYTANIE - co powinien zrobić Tumnus
+  // ============================================================
+  function startQuestion2() {
+    currentStage = "Poziom 2 - pytanie: co powinien zrobić Tumnus";
+    pokazEkran("screenQuiz");
+    setQuizBackground("pieczara-tumnusa.png");
+    quizPanel.innerHTML = `
+      <div class="quiz-progress">Poziom 2 — Decyzja Tumnusa</div>
+      <div class="quiz-question">Co powinien zrobić Tumnus?</div>
+      <div class="quiz-options" id="q2Options"></div>
+      <div class="quiz-feedback" id="q2Feedback"></div>
+      <button class="quiz-next" id="q2NextBtn">Dalej →</button>
+    `;
+
+    const options = [
+      "Uśpić Łucję i oddać ją Białej Czarownicy.",
+      "Zatrzymać Łucję w swojej pieczarze.",
+      "Pomóc Łucji wrócić do latarni i odnaleźć drogę do szafy.",
+      "Odesłać Łucję w głąb lasu."
+    ];
+    const correctIndex = 2;
+    const litery = ["A.", "B.", "C.", "D."];
+
+    const optionsDiv = document.getElementById("q2Options");
+    options.forEach((opt, i) => {
+      const btn = document.createElement("div");
+      btn.className = "quiz-option";
+      btn.textContent = litery[i] + " " + opt;
+      btn.addEventListener("click", () => {
+        const els = document.querySelectorAll("#q2Options .quiz-option");
+        els.forEach(el => el.classList.add("disabled"));
+        els[correctIndex].classList.add("correct");
+        const feedback = document.getElementById("q2Feedback");
+        if (i === correctIndex) {
+          playClick();
+          p2Question2Correct = true;
+          feedback.textContent = "Poprawnie!";
+        } else {
+          playWrong();
+          els[i].classList.add("wrong");
+          p2Question2Correct = false;
+          feedback.textContent = "Niepoprawnie.";
+        }
+        feedback.classList.add("show");
+        document.getElementById("q2NextBtn").style.display = "inline-block";
+      });
+      optionsDiv.appendChild(btn);
+    });
+
+    document.getElementById("q2NextBtn").addEventListener("click", () => {
+      playClick();
+      wyslijWynik("odpowiedział/odpowiedziała na pytanie o decyzję Tumnusa (" + (p2Question2Correct ? "poprawnie" : "błędnie") + ")");
+      startParasolTask();
+    });
+  }
+
+  // ============================================================
+  // KROK 7: KLIKNIJ PARASOL (pojedynczy hotspot na obrazku pieczary)
+  // ============================================================
+  function startParasolTask() {
+    currentStage = "Poziom 2 - Zadanie: znajdź parasol";
+    pokazEkran("screenQuiz");
+    setQuizBackground("pieczara-tumnusa.png");
+    quizPanel.innerHTML = `
+      <div class="quiz-progress">Poziom 2 — Ucieczka</div>
+      <div class="quiz-question" style="font-size:16px;">Tumnus i Łucja muszą natychmiast opuścić pieczarę. Kliknij przedmiot, który Tumnus zabrał ze sobą, i pomóż im ruszyć w drogę!</div>
+      <div class="click-object-hint">Znajdź i kliknij właściwy przedmiot na obrazku</div>
+      <div class="click-object-wrap">
+        <img src="pieczara-tumnusa.png" alt="Pieczara Tumnusa">
+        <div class="click-object-hotspot" id="parasolHotspot" style="left: 8%; top: 15%; width: 16%; height: 55%;"></div>
+      </div>
+      <div class="quiz-feedback" id="parasolFeedback"></div>
+      <button class="quiz-next" id="parasolNextBtn" style="display:none;">Dalej →</button>
+    `;
+
+    document.getElementById("parasolHotspot").addEventListener("click", () => {
+      if (p2ParasolFound) return;
+      p2ParasolFound = true;
+      playClick();
+      document.getElementById("parasolFeedback").textContent = "To właśnie parasol Tumnusa! Nie ma już czasu do stracenia.";
+      document.getElementById("parasolFeedback").classList.add("show");
+      document.getElementById("parasolNextBtn").style.display = "inline-block";
+    });
+
+    document.getElementById("parasolNextBtn").addEventListener("click", () => {
+      playClick();
+      wyslijWynik("znalazł/znalazła parasol Tumnusa");
+      startBlanksTask2();
+    });
+  }
+
+  // ============================================================
+  // KROK 8: UZUPEŁNIJ LUKĘ - o Białej Czarownicy
+  // ============================================================
+  const blanksOdpowiedzi2 = ["Narnią", "zima", "rozkaz", "kara", "kamień"];
+
+  function startBlanksTask2() {
+    currentStage = "Poziom 2 - Zadanie: uzupełnij lukę o Czarownicy";
+    quizPanel.innerHTML = `
+      <div class="quiz-progress">Poziom 2 — Tajemnice Czarownicy</div>
+      <div class="fill-blanks-text">
+        Uzupełnij zdania na podstawie opowieści Tumnusa.<br><br>
+        Biała Czarownica panuje nad <input type="text" class="fill-blank-input" id="p2luka0" autocomplete="off">.
+        To ona sprawia, że w Narnii panuje <input type="text" class="fill-blank-input" id="p2luka1" autocomplete="off">.
+        Tumnus otrzymał od niej <input type="text" class="fill-blank-input" id="p2luka2" autocomplete="off">, aby porywać dzieci.
+        Jej słudzy obawiają się, że jeśli nie będą jej posłuszni, spotka ich <input type="text" class="fill-blank-input" id="p2luka3" autocomplete="off">
+        i zostaną zamienieni w <input type="text" class="fill-blank-input" id="p2luka4" autocomplete="off">.
+      </div>
+      <button class="fill-blanks-check-btn" id="checkBlanks2Btn">Sprawdź odpowiedzi</button>
+      <div class="fill-blanks-feedback" id="blanks2Feedback"></div>
+      <button class="quiz-next" id="blanks2NextBtn" style="display:none; margin-top:16px;">Dalej →</button>
+    `;
+
+    document.getElementById("checkBlanks2Btn").addEventListener("click", checkBlanksTask2);
+  }
+
+  function checkBlanksTask2() {
+    let poprawne = 0;
+    for (let i = 0; i < blanksOdpowiedzi2.length; i++) {
+      const input = document.getElementById("p2luka" + i);
+      const userAnswer = input.value.trim().toLowerCase();
+      const correctAnswer = blanksOdpowiedzi2[i].toLowerCase();
+      if (userAnswer === correctAnswer) {
+        input.classList.add("correct");
+        input.classList.remove("wrong");
+        poprawne++;
+      } else {
+        input.classList.add("wrong");
+        input.classList.remove("correct");
+      }
+    }
+
+    if (poprawne === blanksOdpowiedzi2.length) playClick(); else playWrong();
+
+    p2BlanksScore = poprawne;
+    p2BlanksMax = blanksOdpowiedzi2.length;
+
+    const feedback = document.getElementById("blanks2Feedback");
+    feedback.textContent = `Poprawnych odpowiedzi: ${poprawne} / ${blanksOdpowiedzi2.length}`;
+
+    document.getElementById("checkBlanks2Btn").style.display = "none";
+    const nextBtn = document.getElementById("blanks2NextBtn");
+    nextBtn.style.display = "inline-block";
+
+    nextBtn.addEventListener("click", () => {
+      playClick();
+      wyslijWynik("ukończył/ukończyła Zadanie: luki o Czarownicy (" + poprawne + "/" + blanksOdpowiedzi2.length + ")");
+      startDarkForestScene();
+    });
+  }
+
+  // ============================================================
+  // KROK 9: CIEMNY LAS - znajdź 3 szpiegów (hotspoty)
+  // ============================================================
+  function startDarkForestScene() {
+    currentStage = "Poziom 2 - ciemny las, szuka szpiegów Czarownicy";
+    pokazEkran("screenGame2");
+    scene2BgLayer.style.backgroundImage = "url('las-nocny-szpiedzy.png')";
+    setupSceneScroll2();
+
+    playScene2Dialog(
+      ["Narrator: Pomóż Łucji i Tumnusowi przejść bezpiecznie przez las! Tumnus zna leśne ścieżki i wybiera te najciemniejsze, aby uniknąć szpiegów Białej Czarownicy. Niestety, jej słudzy czają się wśród drzew…\n\nZnajdź wszystkich szpiegów i kliknij na nich, zanim Łucja i Tumnus dotrą do latarni."],
+      "Narrator",
+      setupSpyHotspots
+    );
+  }
+
+  function setupSpyHotspots() {
+    p2SpiesFound = 0;
+    scene2Hotspots.innerHTML = `
+      <div class="hotspot" id="spyWilk" style="left: 12%; top: 30%; width: 14%; height: 40%;"></div>
+      <div class="hotspot" id="spyKarzel" style="left: 45%; top: 45%; width: 12%; height: 35%;"></div>
+      <div class="hotspot" id="spyDrzewo" style="left: 78%; top: 15%; width: 16%; height: 55%;"></div>
+    `;
+
+    ["spyWilk", "spyKarzel", "spyDrzewo"].forEach(id => {
+      const el = document.getElementById(id);
+      el.addEventListener("click", () => {
+        if (el.classList.contains("found")) return;
+        el.classList.add("found");
+        el.style.background = "rgba(120,180,110,0.3)";
+        el.style.borderColor = "#8fc97e";
+        playClick();
+        p2SpiesFound++;
+        mowNarrator2(`Znaleziono szpiega! (${p2SpiesFound} / ${p2SpiesMax})`, "Narrator");
+
+        if (p2SpiesFound === p2SpiesMax) {
+          wyslijWynik("znalazł/znalazła wszystkich szpiegów Czarownicy (" + p2SpiesFound + "/" + p2SpiesMax + ")");
+          setTimeout(() => {
+            startTraitsCheckTask();
+          }, 1600);
+        }
+      });
+    });
+
+    mowNarrator2("Znajdź trzech szpiegów ukrytych w lesie.", "Narrator");
+  }
+
+  // ============================================================
+  // KROK 10: ZAZNACZ CECHY TUMNUSA (checkboxy, kilka poprawnych)
+  // ============================================================
+  function startTraitsCheckTask() {
+    currentStage = "Poziom 2 - ocena Tumnusa (zaznacz cechy)";
+    pokazEkran("screenQuiz");
+    setQuizBackground("las-nocny-szpiedzy.png");
+
+    const options = [
+      { text: "odważny", correct: true },
+      { text: "pomocny", correct: true },
+      { text: "bezwzględny", correct: false },
+      { text: "gotowy przyznać się do błędu", correct: true },
+      { text: "tchórzliwy", correct: false },
+      { text: "zdolny do zmiany swojej decyzji", correct: true }
+    ];
+
+    quizPanel.innerHTML = `
+      <div class="quiz-progress">Poziom 2 — Jak oceniasz Tumnusa?</div>
+      <div class="quiz-question">Udało się! Łucja i Tumnus przemknęli przez las niezauważeni. Zaznacz cechy, które pasują do Tumnusa (może być kilka poprawnych):</div>
+      <div class="checkbox-list" id="traitsCheckList"></div>
+      <button class="quiz-next" id="checkTraitsCheckBtn" style="display:inline-block;">Sprawdź</button>
+      <div class="quiz-feedback" id="traitsCheckFeedback"></div>
+      <button class="quiz-next" id="traitsCheckNextBtn" style="display:none; margin-top:16px;">Zakończ Poziom 2 →</button>
+    `;
+
+    const list = document.getElementById("traitsCheckList");
+    const selected = new Set();
+
+    options.forEach((opt, i) => {
+      const row = document.createElement("div");
+      row.className = "checkbox-item";
+      row.innerHTML = `<span class="checkbox-box"></span><span class="checkbox-item-text">${opt.text}</span>`;
+      row.addEventListener("click", () => {
+        playClick();
+        if (selected.has(i)) {
+          selected.delete(i);
+          row.classList.remove("checked");
+          row.querySelector(".checkbox-box").textContent = "";
+        } else {
+          selected.add(i);
+          row.classList.add("checked");
+          row.querySelector(".checkbox-box").textContent = "✓";
+        }
+      });
+      list.appendChild(row);
+    });
+
+    document.getElementById("checkTraitsCheckBtn").addEventListener("click", () => {
+      let correct = 0;
+      const maxCorrect = options.filter(o => o.correct).length;
+
+      document.querySelectorAll("#traitsCheckList .checkbox-item").forEach((row, i) => {
+        const isSelected = selected.has(i);
+        const isCorrect = options[i].correct;
+        if (isSelected && isCorrect) {
+          row.classList.add("correct");
+          correct++;
+        } else if (isSelected && !isCorrect) {
+          row.classList.add("wrong");
+        } else if (!isSelected && isCorrect) {
+          row.classList.add("wrong");
+        }
+      });
+
+      p2TraitsCheckScore = correct;
+      p2TraitsCheckMax = maxCorrect;
+
+      if (correct === maxCorrect) playClick(); else playWrong();
+
+      const feedback = document.getElementById("traitsCheckFeedback");
+      feedback.textContent = `Poprawnie zaznaczonych cech: ${correct} / ${maxCorrect}`;
+      feedback.classList.add("show");
+
+      document.getElementById("checkTraitsCheckBtn").style.display = "none";
+      document.getElementById("traitsCheckNextBtn").style.display = "inline-block";
+    });
+
+    document.getElementById("traitsCheckNextBtn").addEventListener("click", () => {
+      playClick();
+      wyslijWynik("ukończył/ukończyła Zadanie: ocena Tumnusa (" + p2TraitsCheckScore + "/" + p2TraitsCheckMax + ")");
+      renderZakonczeniePoziom2();
+    });
+  }
+
+  // ============================================================
+  // EKRAN KOŃCOWY POZIOMU 2 - wynik procentowy + szczegóły
+  // ============================================================
+  function renderZakonczeniePoziom2() {
+    const parts = [
+      { label: "Znajdź fauna", got: 1, max: 1 }, // zawsze 1/1 - zadanie bez punktacji częściowej
+      { label: "Cechy Tumnusa (karty)", got: p2TraitsScore, max: p2TraitsMax },
+      { label: "Podwieczorek", got: p2FoodScore, max: p2FoodMax },
+      { label: "Pytanie: łzy Tumnusa", got: p2Question1Correct ? 1 : 0, max: 1 },
+      { label: "Pytanie: decyzja Tumnusa", got: p2Question2Correct ? 1 : 0, max: 1 },
+      { label: "Znajdź parasol", got: p2ParasolFound ? 1 : 0, max: 1 },
+      { label: "Luki o Czarownicy", got: p2BlanksScore, max: p2BlanksMax },
+      { label: "Szpiedzy w lesie", got: p2SpiesFound, max: p2SpiesMax },
+      { label: "Ocena Tumnusa", got: p2TraitsCheckScore, max: p2TraitsCheckMax }
+    ];
+
+    const gotTotal = parts.reduce((sum, p) => sum + p.got, 0);
+    const maxTotal = parts.reduce((sum, p) => sum + p.max, 0);
+    const percent = Math.round((gotTotal / maxTotal) * 100);
+    const zaliczone = percent === 100;
+
+    currentStage = zaliczone
+      ? "ukończył/ukończyła Poziom 2 (zaliczone)"
+      : "ukończył/ukończyła Poziom 2 (niezaliczone, " + percent + "%)";
+
+    wyslijWynik(
+      (zaliczone ? "ZALICZYŁ/ZALICZYŁA" : "NIE ZALICZYŁ/NIE ZALICZYŁA") +
+      " Poziom 2 - wynik łączny " + percent + "% (" + gotTotal + "/" + maxTotal + ")"
+    );
+
+    function scoreRowClass(got, max) {
+      if (got === max) return "score-row-good";
+      if (got === 0) return "score-row-bad";
+      return "score-row-mid";
+    }
+
+    pokazEkran("screenQuiz");
+    quizPanel.innerHTML = `
+      <div class="quiz-result-emoji">${zaliczone ? "🏆" : "📖"}</div>
+      <div class="quiz-result-score">${percent}% poprawnych odpowiedzi</div>
+      <div class="quiz-result-text">
+        ${zaliczone
+          ? "Gratulacje! Zaliczyłeś/aś Poziom 2 na 100%."
+          : "Niestety nie udało się zaliczyć poziomu (wymagane 100%). Możesz spróbować ponownie."}
+      </div>
+      <div class="score-breakdown">
+        ${parts.map(p => `
+          <div class="score-row ${scoreRowClass(p.got, p.max)}">
+            <span>${p.label}</span><span>${p.got} / ${p.max}</span>
+          </div>
+        `).join("")}
+      </div>
+      <div class="zakonczenie-buttons">
+        ${!zaliczone ? '<button class="quiz-next" id="retryBtn2">Spróbuj ponownie</button>' : ''}
+        <button class="quiz-next ${zaliczone ? '' : 'secondary'}" id="finishBackBtn2">Wróć do wyboru poziomu</button>
+      </div>
+    `;
+
+    document.getElementById("finishBackBtn2").addEventListener("click", () => {
+      playClick();
+      pokazEkran("screenLevels");
+    });
+
+    const retryBtn2 = document.getElementById("retryBtn2");
+    if (retryBtn2) {
+      retryBtn2.addEventListener("click", () => {
+        playClick();
+        // Reset wyników i powrót od razu do zadania z cechami Tumnusa -
+        // bez ponownego szukania fauna w lesie
+        p2TraitsScore = 0; p2FoodScore = 0;
+        p2Question1Correct = false; p2Question2Correct = false;
+        p2ParasolFound = false; p2BlanksScore = 0;
+        p2SpiesFound = 0; p2TraitsCheckScore = 0;
+        startTraitsTask();
       });
     }
   }
